@@ -21,7 +21,7 @@ namespace MusalaGatewaysSysAdmin.Controllers
         {
             _gatewayRepository = gatewayRepository;
         }
-
+        // METHOD: URL          using   HttpHeaders 'Content-Type': 'application/json;'
         // GET: api/Gateways                          1  OK
         [HttpGet]
         public IEnumerable<Gateway> GetAllGateway()
@@ -50,9 +50,7 @@ namespace MusalaGatewaysSysAdmin.Controllers
             }
         }
 
-        // PUT: api/Gateways                          3  OK
-        // Gateway from body
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754                         
+        // PUT: api/Gateways    {Gateway from body}   3  OK
         [HttpPut]
         public async Task<ActionResult<Gateway>> PutGateway(Gateway gateway)
         {
@@ -60,7 +58,7 @@ namespace MusalaGatewaysSysAdmin.Controllers
             {
                 if (gateway != null)
                 {
-                    if (gateway.SerialNumber != null)
+                    if (gateway.SerialNumber != "")
                     {
                         Regex IPv4Format = new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
 
@@ -75,7 +73,7 @@ namespace MusalaGatewaysSysAdmin.Controllers
                         {
                             if (!IPv4Format.IsMatch(gateway.IpAddress))
                             {
-                                ModelState.AddModelError("IpAddress", "IP Address format error.");
+                                ModelState.AddModelError("ModelError", "IP Address format error.");
 
                                 return BadRequest(ModelState);
                             }
@@ -84,7 +82,7 @@ namespace MusalaGatewaysSysAdmin.Controllers
                             {
                                 if (gateway.LsPeripheralDevices.Count > gateway.MaxClientNumber)
                                 {
-                                    ModelState.AddModelError("MaxClientNumber", "Max client number violation.");
+                                    ModelState.AddModelError("ModelError", "Max client number violation.");
                                     return BadRequest(ModelState);
                                 }
                                 else
@@ -93,7 +91,8 @@ namespace MusalaGatewaysSysAdmin.Controllers
 
                                     if (eGateway == null)
                                     {
-                                        return NotFound();
+                                        ModelState.AddModelError("ModelError", "Internal Server Error.");
+                                        return BadRequest(ModelState);
                                     }
                                     else
                                     {
@@ -116,7 +115,7 @@ namespace MusalaGatewaysSysAdmin.Controllers
                     }
                     else
                     {
-                        ModelState.AddModelError("NoData", "Empty fields.");
+                        ModelState.AddModelError("SerialNumber", "Empty fields.");
                         return BadRequest(ModelState);
 
                     }
@@ -127,44 +126,64 @@ namespace MusalaGatewaysSysAdmin.Controllers
                     return BadRequest(ModelState);
                 }
             }
-            catch (DbUpdateConcurrencyException DbEx)
-            {
-                if (await _gatewayRepository.GetGateway(gateway.ID) == null)
+            catch (Exception e)
+            { 
+                var eGateway = await _gatewayRepository.GetGateway(gateway.ID);
+                if (eGateway != null)
                 {
-                    return NotFound();
+                    // The current values are the values that the application tried to write to the database.???
+                    if (gateway == eGateway.Value)
+                    { 
+                        return eGateway;
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(e.Message);
+                    }
                 }
                 else
                 {
-                    return NotFound(DbEx.Message);
+                     return await PutGateway(gateway);
                 }
             }
 
         }
 
-        // UPDATE: api/Gateways                       4  OK
+        // PATCH: api/Gateways  {Gateway from body}    4  OK
         [HttpPatch]
-        public ActionResult<Gateway> UpdateGateway(Gateway gateway)
+        public async Task<ActionResult<Gateway>> UpdateGateway(Gateway gateway)
         {
-            var eGateway = _gatewayRepository.UpdateGateway(gateway);
+            try
+            {
+                var eGateway = await _gatewayRepository.UpdateGateway(gateway);
 
-            if (eGateway == null) return NotFound();
+                if (eGateway.Value == gateway) return eGateway;
 
-            return eGateway.Value;
+                return NotFound();
+            }
+            catch (DbUpdateConcurrencyException)
+            { 
+                var eGateway = _gatewayRepository.GetGateway(gateway.ID).Result;
+                if (eGateway.Value != null)
+                {
+                    // The current values are the values that the application tried to write to the database.???
+                    if (gateway == eGateway.Value)
+                    {
+                        return eGateway;
+                    }
+                    else
+                    { 
+                        return await UpdateGateway(gateway);
+                    }
+                }
+                else
+                {
+                    throw new NotSupportedException("Unknow Db Update Concurrency Exception");
+                }
+            }
+            
         }
-
-        /*       
-       // POST: api/Gateways
-       // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-       [HttpPost]
-       public async Task<ActionResult<Gateway>> PostGateway(Gateway gateway)
-       { 
-
-           _context.Gateway.Add(gateway);
-           await _context.SaveChangesAsync();
-
-           return CreatedAtAction("GetGateway", new { id = gateway.ID }, gateway);
-       }
-        */
+         
         // DELETE: api/Gateways/5                     5  OK          
         [HttpDelete("{id}")]
         public async Task<ActionResult<Gateway>> DeleteGateway(int id)
@@ -182,7 +201,8 @@ namespace MusalaGatewaysSysAdmin.Controllers
 
         }
 
-        // ADD Periferical Device: api/Gateways/5     6  OK
+        // POST Periferical Device: api/Gateways/5     6  OK
+        //      {PeripheralDevice from body}
         [HttpPost("{id=int}")]
         public async Task<ActionResult<Gateway>> AddPeriphericalDevice(int id, PeripheralDevice peripheralDevice)
         { 
@@ -203,12 +223,10 @@ namespace MusalaGatewaysSysAdmin.Controllers
             }
         }
 
-        // DELETE: api/Gateways/5                           
-        //                                             7 OK             
+        // DELETE: api/Gateways?{idGateway=#}&{idPDevice=#} 7 OK             
         [HttpDelete]
         public async Task<ActionResult<Gateway>> DeletePeriphericalDevice(int idGateway, int idPDevice)
-        {   //Tratamiento de Execciones
-
+        {     
             try
             {
                 var eGateway = await _gatewayRepository.DeleteDeviceFromGateway(idGateway, idPDevice);
@@ -227,149 +245,5 @@ namespace MusalaGatewaysSysAdmin.Controllers
             }
         }
 
-    }
-
-
-    /*
-    public class GatewaysController2 : Controller
-    {
-        private readonly GatewaysSysAdminDBContext _context;
-
-        public GatewaysController(GatewaysSysAdminDBContext context)
-        {
-            _context = context;
-        }
-
-        // GET: Gateways
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Gateway.ToListAsync());
-        }
-
-        // GET: Gateways/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var gateway = await _context.Gateway
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (gateway == null)
-            {
-                return NotFound();
-            }
-
-            return View(gateway);
-        }
-
-        // GET: Gateways/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Gateways/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,SerialNumber,Name,IpAddress,MaxClientNumber")] Gateway gateway)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(gateway);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(gateway);
-        }
-
-        // GET: Gateways/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var gateway = await _context.Gateway.FindAsync(id);
-            if (gateway == null)
-            {
-                return NotFound();
-            }
-            return View(gateway);
-        }
-
-        // POST: Gateways/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,SerialNumber,Name,IpAddress,MaxClientNumber")] Gateway gateway)
-        {
-            if (id != gateway.ID)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(gateway);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!GatewayExists(gateway.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(gateway);
-        }
-
-        // GET: Gateways/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var gateway = await _context.Gateway
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (gateway == null)
-            {
-                return NotFound();
-            }
-
-            return View(gateway);
-        }
-
-        // POST: Gateways/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var gateway = await _context.Gateway.FindAsync(id);
-            _context.Gateway.Remove(gateway);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool GatewayExists(int id)
-        {
-            return _context.Gateway.Any(e => e.ID == id);
-        }
-    }
-    */
+    } 
 }

@@ -1,0 +1,61 @@
+<h1 class="center" id="tableLabel">{{page}}</h1>
+<div class="info">
+  <h5>{{table}}</h5>
+  <table  class="table table-active">
+    <tr>
+      <td>ID</td>
+      <td>{{gateway.id}}</td>
+    </tr>
+    <tr>
+      <td>Serial Number</td>
+      <td>{{gateway.serialNumber}}</td>
+    </tr>
+    <tr>
+      <td>Name</td>
+      <td>{{gateway.name}}</td>
+    </tr>
+    <tr>
+      <td>Ip Address</td>
+      <td>{{gateway.ipAddress}}</td>
+    </tr>
+    <tr>
+      <td>Registered Devices</td>
+      <td>
+        {{gateway.lsPeripheralDevices.length}}
+       
+        <a class="ms-sm-1 btn btn-sm btn-outline-success" [routerLink]="['/add-peripherical-device/', idGateway,gateway.name]"> + Add New. </a>
+
+      </td>
+    </tr>
+  </table>
+
+</div>
+<div class="childs">
+ 
+  <table class="table table-bordered">
+    <tr>
+      <td>ID</td>
+      <td>User ID</td>
+      <td>Device Vendor</td>
+      <td>Registered Date</td>
+      <td>Online</td>
+    </tr>
+    <tr *ngFor="let peripheralDevice of gateway.lsPeripheralDevices">
+      <td>{{peripheralDevice.id}}</td>
+      <td>{{peripheralDevice.uId}}</td>
+      <td>{{peripheralDevice.deviceVendor}}</td>
+      <td>{{peripheralDevice.dtDeviceCreated}}</td>
+      <td>{{peripheralDevice.online}}</td>
+      <td>
+        <button type="button" (click)="DeletePeriphericalDevice(peripheralDevice.id)" class="ms-sm-1 btn btn-sm btn-outline-danger">
+          <img src="../../../assets/images/trash-10-128.gif" height="18" width="20" />
+        </button>
+      </td>
+    </tr>
+  </table>
+</div>
+<div class="center">
+  <a class="ms-sm-1 btn btn-sm btn-outline-primary" [routerLink]="['/master-gateways']">Continue</a>
+   
+</div>
+

@@ -1,0 +1,11 @@
+.center 
+{
+  text-align: center; 
+  padding: 8px;
+}
+
+div {
+  width: 80%;
+  padding: 4px;
+  margin: auto;
+}

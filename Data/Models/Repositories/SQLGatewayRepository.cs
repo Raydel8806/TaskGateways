@@ -13,7 +13,10 @@ namespace MusalaGatewaysSysAdmin.Models
     public class SQLGatewayRepository : IGatewayRepository
     { 
         private readonly IDbContextFactory<GatewaysSysAdminDBContext> _contextFactory;
-
+        /// <summary>
+        /// SQLGatewayRepository Constructor.
+        /// </summary>
+        /// <param name="gatewaysSysAdminDBContextFactory"></param>
         public SQLGatewayRepository(IDbContextFactory<GatewaysSysAdminDBContext> gatewaysSysAdminDBContextFactory)
         {
             this._contextFactory = gatewaysSysAdminDBContextFactory;
@@ -66,6 +69,7 @@ namespace MusalaGatewaysSysAdmin.Models
         async Task<ActionResult<Gateway>> IGatewayRepository.GetGateway(int gatewayId)
         {
             using var cSysAdminDBContext = _contextFactory.CreateDbContext();
+
             var rGateway = await cSysAdminDBContext.Gateway.FindAsync(gatewayId);
 
             if (rGateway != null)
@@ -105,12 +109,51 @@ namespace MusalaGatewaysSysAdmin.Models
             return null!;
         }//OK
 
-        ActionResult<Gateway>IGatewayRepository.UpdateGateway(Gateway gateway)//OK
+        async Task<ActionResult<Gateway>> IGatewayRepository.UpdateGateway(Gateway gateway)//OK
         {
             using var cSysAdminDBContext = _contextFactory.CreateDbContext();
-            cSysAdminDBContext.Entry(gateway).State = EntityState.Modified;
-            cSysAdminDBContext.SaveChanges();
 
+            var existGateway = cSysAdminDBContext.Gateway.Where(e => e.ID == gateway.ID).Any();
+            
+            if (existGateway) 
+            {
+                //if is intent to change SerialNumber, I check if ne new is avaible
+                if (cSysAdminDBContext
+                    .Gateway
+                    .Where(e => e.ID == gateway.ID)
+                    .FirstAsync()
+                    .Result
+                    .SerialNumber != gateway.SerialNumber)
+                {
+                    //I use !, unnecessary null validation for 'gateway.SerialNumber!' API + MODEL does.
+                    var eGateway =  GetGatewayBySerialNumber(gateway.SerialNumber!).Result;
+
+                    //Validate is exist SerialNumber
+                    if (eGateway != null)
+                    {
+                        throw new Exception("Unique Serial Number already exist.");
+                    }
+
+                    //If Clients Number is correct
+                    if (gateway.MaxClientNumber<gateway.LsPeripheralDevices.Count)
+                    { 
+                        throw new Exception("MaxClientNumber Violation.");
+                    }
+                     
+                }
+
+                using var c2SysAdminDBContext = _contextFactory.CreateDbContext();
+
+                c2SysAdminDBContext.Entry(gateway).State = EntityState.Modified;
+                await c2SysAdminDBContext.SaveChangesAsync();
+                return gateway;
+
+            }
+            else
+            {
+                throw new Exception("Gateway not found");
+            }
+             
             /*            
             var rGateway = cSysAdminDBContext.Gateway.FirstOrDefaultAsync(e => e.ID == gateway.ID).Result;
             if (rGateway != null)
@@ -128,7 +171,7 @@ namespace MusalaGatewaysSysAdmin.Models
                     return rGateway;
                 } 
             }*/
-            return gateway;             
+                 
         }
 
         async Task<ActionResult<Gateway>> IGatewayRepository.AddDeviceToGateway(int gatewayId, PeripheralDevice peripheralDevice)
@@ -162,23 +205,25 @@ namespace MusalaGatewaysSysAdmin.Models
                     {
                         if (eGateway.LsPeripheralDevices.Count < eGateway.MaxClientNumber)
                         { 
+                            peripheralDevice.DtDeviceCreated = DateTime.Now;
+
                             eGateway.LsPeripheralDevices.Add(peripheralDevice);
 
                             cSysAdminDBContext.SaveChanges(); 
 
-                            return eGateway;
-                            
+                            return eGateway; 
+
                         }
                         else
                         {
                             throw new Exception("This Gateway can not accept more clients.");
-
                         }
 
                     } 
                 }
 
                 cSysAdminDBContext.Attach(eGateway);
+
                 await cSysAdminDBContext.SaveChangesAsync();
 
                 if (await IsDeviceInGateway(gatewayId, peripheralDevice.ID))
@@ -192,7 +237,13 @@ namespace MusalaGatewaysSysAdmin.Models
 
             }
         }
-
+        /// <summary>
+        /// Delete All Peripherical Device
+        /// </summary>
+        /// <param name="gatewayId"></param>
+        /// <param name="peripheralDeviceId"></param>
+        /// <returns>ActionResult<Gateway></returns>
+        /// <exception cref="Exception"></exception>
         async Task<ActionResult<Gateway>> IGatewayRepository.DeleteDeviceFromGateway(int gatewayId, int peripheralDeviceId)
         {
             using var c1SysAdminDBContext = _contextFactory.CreateDbContext();
@@ -248,7 +299,12 @@ namespace MusalaGatewaysSysAdmin.Models
             }
 
         }
-
+        
+        /// <summary>
+        /// Get Gateway By Serial Number
+        /// </summary>
+        /// <param name="serialNumber"></param>
+        /// <returns>ActionResult<Gateway>?</returns>
         async Task<ActionResult<Gateway>?> GetGatewayBySerialNumber(string serialNumber)
         {
             using var c1SysAdminDBContext = _contextFactory.CreateDbContext();
@@ -277,6 +333,14 @@ namespace MusalaGatewaysSysAdmin.Models
             //}
             return nGateway;
         }
+
+        /// <summary>
+        /// Is Device In Gateway
+        /// </summary>
+        /// <param name="gatewayId"></param>
+        /// <param name="peripheralDeviceId"></param>
+        /// <returns>Task<bool></returns>
+        /// <exception cref="Exception"></exception>
         private async Task<bool> IsDeviceInGateway(int gatewayId, int peripheralDeviceId)
         {
             using var cSysAdminDBContext = _contextFactory.CreateDbContext();
@@ -297,6 +361,12 @@ namespace MusalaGatewaysSysAdmin.Models
             return eGateway.LsPeripheralDevices.Contains(ePeripheralDevice);
              
         }
+
+        /// <summary>
+        /// GetGatewayBySerialNumber
+        /// </summary>
+        /// <param name="serialNumber"></param>
+        /// <returns>Task<Gateway?></returns>
         async Task<Gateway?> IGatewayRepository.GetGatewayBySerialNumber(string serialNumber)
         {
             using var cSysAdminDBContext = _contextFactory.CreateDbContext();

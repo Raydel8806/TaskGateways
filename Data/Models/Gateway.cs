@@ -7,9 +7,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace MusalaGatewaysSysAdmin.Models
 {
     public class Gateway
-    { 
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID{get; set;}
-
+         
         [Required]
         [Display(Name = "Serial Number")]
         public string? SerialNumber  { get; set; } 

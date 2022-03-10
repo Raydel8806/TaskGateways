@@ -1,0 +1,17 @@
+.center {
+  text-align: center;
+  padding: 8px;
+}
+
+
+.info {
+  width: 40%;
+  padding: 4px;
+  margin: auto;
+}
+
+.childs {
+  width: 60%;
+  padding: 4px;
+  margin: auto;
+}

@@ -1,0 +1,12 @@
+
+.scaffold { 
+  line-height: 100px;
+  margin: 20px auto;
+  text-align: center;
+  background-color: #ffffff;
+}
+
+  .scaffold img {
+    vertical-align: middle;
+    glyph-orientation-horizontal:inherit;
+  }

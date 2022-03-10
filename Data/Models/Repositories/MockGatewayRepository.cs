@@ -7,10 +7,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MusalaGatewaysSysAdmin.Models;
 
+/// <summary>
+/// Repository to perform the first tests of the API without 
+/// creating the first migration with entity framework.
+/// </summary>
 namespace MusalaGatewaysSysAdmin.Models
 {
+    
+    
     /*
-    public class MockGatewayRepository 
+    public class MockGatewayRepository : IGatewayRepository
     {
         private List<Gateway> _gatewayRepository; 
 
@@ -158,4 +164,5 @@ namespace MusalaGatewaysSysAdmin.Models
             return nGateway;
         }
     }
-  */}
+  */
+}

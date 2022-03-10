@@ -1,0 +1,42 @@
+<h1 class="center" id="tableLabel">{{page}}</h1>
+<div class="main">{{table}}
+  <div class="submit-form">
+    <div>
+      <div class="form-group">
+        <label for="uID">UID</label>
+        <input type="number" class="form-control" id="uId" required
+               [(ngModel)]="periphericalDevice.uId" name="uId"
+               min="1" max="9999999999" maxlength="10" />
+        <label for="deviceVendor">Device Vendor</label>
+        <input type="text" class="form-control" id="deviceVendor" required
+               [(ngModel)]="periphericalDevice.deviceVendor" name="deviceVendor" />
+         
+        <div class="form-check">
+          <input value=false required [(ngModel)]="periphericalDevice.online" class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+          <label class="form-check-label" for="flexRadioDefault1">
+            Offline
+          </label>
+        </div>
+        <div class="form-check">
+          <input value=true required [(ngModel)]="periphericalDevice.online" class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
+          <label class="form-check-label" for="flexRadioDefault2">
+            Online
+          </label>
+        </div>
+      </div>
+
+
+
+
+      <div class="center">
+        <a class="ms-sm-1 btn btn-sm btn-outline-secondary" [routerLink]="['/detail-gateway/', idGateway]">Cancel </a>
+        <button (click)="submitPeriphericalDevice()" class="btn btn-primary btn-sm btn-outline-success">Add</button>
+      </div>
+    </div>
+
+    <div *ngIf="submittedPeriphericalDevice" class="center">
+      <h4>Peripherical Device was submitted successfully!</h4>
+      <button class="ms-sm-1 btn btn-sm btn-outline-success" (click)="resetPeriphericalDeviceData()">Add new</button>
+    </div>
+  </div> 
+</div>

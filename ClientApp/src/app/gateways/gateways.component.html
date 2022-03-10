@@ -1,0 +1,27 @@
+ 
+<h1 id="tableLabel">Gateways List {{this.gateways[2].ipAddress}}</h1>
+
+<p>List of all Gateways in the server.</p>
+
+<p *ngIf="!gateways"><em>Loading...</em></p>
+
+<table class='table table-striped' aria-labelledby="tableLabel">
+  <thead>
+    <tr>
+      <td>ID</td>
+      <td>Serial Number</td>
+      <td>Name</td>
+      <td>Ip Address</td>
+      <td>Registered Clients</td>
+    </tr>
+  </thead>
+
+  <tr *ngFor="let gateway of gateways; let i = index">
+    <td>{{gateway.id}}</td>/li>
+    <td>{{gateway.serialNumber}}</td>
+    <td>{{gateway.name}}</td>
+    <td>{{gateway.ipAddress}}</td>
+    <td>{{gateway.lsPeripheralDevices.length}}</td>
+  </tr>
+
+</table>

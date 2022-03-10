@@ -14,11 +14,10 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let forecast of forecasts">
-      <td>{{ forecast.date }}</td>
-      <td>{{ forecast.temperatureC }}</td>
-      <td>{{ forecast.temperatureF }}</td>
-      <td>{{ forecast.summary }}</td>
+    <tr *ngFor="let gateway of forecasts; let i = index">
+      <td>{{gateway.id}}</td> 
+      <td>{{gateway.serialNumber}}</td>
+      <td>{{gateway.name}}</td>
+      <td>{{gateway.ipAddress}}</td> 
     </tr>
-  </tbody>
 </table>

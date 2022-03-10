@@ -1,0 +1,43 @@
+<h1 *ngIf="idGateway" class="center" id="tableLabel">{{page}}</h1>
+<div class="main">
+  <div class="submit-form">
+    <div *ngIf="!submittedEdited">
+      <div class="form-group">
+        <label for="serialNumber">Serial Number</label>
+        <input type="text"
+               class="form-control"
+               id="serialNumber"
+               required
+               [(ngModel)]="gateway.serialNumber"
+               name="serialNumber" />
+        <label for="name">Name</label>
+        <input type="text"
+               class="form-control"
+               id="name"
+               required
+               [(ngModel)]="gateway.name"
+               name="name" />
+        <label for="ipAddress">Ip Address</label>
+        <input type="text"
+               class="form-control"
+               id="ipAddress"
+               required
+               [(ngModel)]="gateway.ipAddress"
+               name="ipAddress" />
+      </div>
+      <div class="center">
+        <button (click)="submitGateway()" class="ms-sm-1 btn btn-sm btn-outline-primary">Save</button>
+        <a class="ms-sm-1 btn btn-sm btn-outline-secondary" [routerLink]="['/master-gateways']">Cancel</a>
+      </div>
+
+    </div>
+    <div *ngIf="submittedEdited">
+      <h4 *ngIf="isEditedMode">Gateway was edited successfully!</h4>
+      <h4 *ngIf="!isEditedMode">Gateway was submitted successfully!</h4>
+      <button class="ms-sm-1 btn btn-sm btn-outline-success" (click)="resetGatewayData()">Add new</button>
+      <a class="ms-sm-1 btn btn-sm btn-outline-success" [routerLink]="['/detail-gateway/', gateway.id]">  Add Peripherical Devices. </a>
+      <a class="ms-sm-1 btn btn-sm btn-outline-success" [routerLink]="['/master-gateways']">Continue</a>
+
+    </div>
+  </div>
+</div>

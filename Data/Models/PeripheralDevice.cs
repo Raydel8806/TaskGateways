@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 namespace MusalaGatewaysSysAdmin.Models
 {
     public class PeripheralDevice 
-    { 
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
-
+         
         [Required]
         [Display(Name = "User ID")]
         public long UId { get; set; }
@@ -25,9 +27,7 @@ namespace MusalaGatewaysSysAdmin.Models
         [Required]
         [Display(Name = "Estatus")]
         public bool Online { get; set; }
-         
-        //Navigation
-        public virtual Gateway? Gateway { get; set; }    
+          
         public int GatewayID { get; set; }
 
     }

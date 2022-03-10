@@ -1,0 +1,32 @@
+<h1  *ngIf="gateways" class="center" id="tableLabel">{{page}}</h1>
+  
+<div class="table" *ngIf="gateways">
+  <h5>{{table}}</h5>
+  <table class='table table-bordered' aria-labelledby="tableLabel">
+    <thead>
+      <tr>
+        <th>  No </th>
+        <th>Serial Number</th>
+        <th>Name      </th>
+        <th>Ip Address</th>
+        <th>Carga / Capacidad</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let gateway of gateways; let i = index">
+        <td>{{gateway.id}}</td>
+        <td>{{gateway.serialNumber}}</td>
+        <td>{{gateway.name}}</td>
+        <td>{{gateway.ipAddress}}</td>
+        <td>{{gateway.lsPeripheralDevices.length}}/{{gateway.maxClientNumber}}</td>
+        <td>
+          <a class="ms-sm-1 btn btn-sm btn-outline-info" [routerLink]="['/detail-gateway/', gateway.id]">  Inf. </a>
+          <button type="button" (click)="goEdit(gateway.id)" class="ms-sm-1 btn btn-sm btn-outline-warning">✏</button>
+          <button type="button" (click)="deleteGateway(gateway.id)" class="ms-sm-1 btn btn-sm btn-outline-danger">
+          <img src="../../../assets/images/trash.png" height="18" width="20" /></button>
+        </td>
+      </tr>
+    </tbody> 
+  </table> 
+</div>
