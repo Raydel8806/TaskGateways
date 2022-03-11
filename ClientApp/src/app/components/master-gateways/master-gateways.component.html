@@ -14,8 +14,8 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let gateway of gateways; let i = index">
-        <td>{{gateway.id}}</td>
+      <tr *ngFor="let gateway of gateways; ; let i = index" [attr.data-index]="i">
+        <td>{{i+1}}</td>
         <td>{{gateway.serialNumber}}</td>
         <td>{{gateway.name}}</td>
         <td>{{gateway.ipAddress}}</td>

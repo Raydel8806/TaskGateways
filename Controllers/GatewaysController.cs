@@ -222,7 +222,7 @@ namespace MusalaGatewaysSysAdmin.Controllers
                 return BadRequest(error: e.Message.ToString());
             }
         }
-
+         
         // DELETE: api/Gateways?{idGateway=#}&{idPDevice=#} 7 OK             
         [HttpDelete]
         public async Task<ActionResult<Gateway>> DeletePeriphericalDevice(int idGateway, int idPDevice)

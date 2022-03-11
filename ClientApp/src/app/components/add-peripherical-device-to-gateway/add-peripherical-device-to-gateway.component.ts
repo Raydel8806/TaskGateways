@@ -5,19 +5,21 @@ import { Gateway } from '../../domain/gateway';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { GatewaysService } from '../../service/gateways.service';
 import { PeriphericalDevice } from '../../domain/peripherical-device';
-
+import { DatePipe } from '@angular/common' 
+ 
 @Component({
   selector: 'app-add-peripherical-device-to-gateway',
   templateUrl: './add-peripherical-device-to-gateway.component.html',
   styleUrls: ['./add-peripherical-device-to-gateway.component.css']
 })
 export class AddPeriphericalDeviceToGatewayComponent implements OnInit {
+
   periphericalDevice: PeriphericalDevice = {
     id: 0,
     uId: 0,
     deviceVendor: '',
-    dtDeviceCreated: '',
-    online: false,
+    dtDeviceCreated: new Date(),
+    online: 'false',
     gatewayID:0 
   };
 
@@ -29,7 +31,7 @@ export class AddPeriphericalDeviceToGatewayComponent implements OnInit {
   public idGateway: any = ''; 
   public nameGateway: any ='';
 
-  constructor(private gatewaysService: GatewaysService,private route: ActivatedRoute) { }
+  constructor(private gatewaysService: GatewaysService, private route: ActivatedRoute, public datepipe: DatePipe) { }
 
   ngOnInit(): void {
     this.idGateway = this.route.snapshot.params['idGateway'];
@@ -38,33 +40,29 @@ export class AddPeriphericalDeviceToGatewayComponent implements OnInit {
   }
 
   submitPeriphericalDevice(): void {
-
+     
     if (this.validData())
-    { 
+    {
       const newPeriphericalDevice = {
         id: 0,
         uId: this.periphericalDevice.uId,
         deviceVendor: this.periphericalDevice.deviceVendor,
-        dtDeviceCreated: Date.now.toString(),
-        online: this.periphericalDevice.online,
+        dtDeviceCreated: this.getDate('yyyy-MM-dd'),
+        online: this.periphericalDevice.online === 'true' ? true : false,
         gatewayID: 0
       };
 
       this.gatewaysService
         .AddPeriphericalDevice(this
         .idGateway, newPeriphericalDevice)
-        .subscribe(
-          {
-            next: (result) =>
-            {
-              this.result = result;
-              console.info(this.result);
-              this.submittedPeriphericalDevice = true;
-              this.resetPeriphericalDeviceData();
+        .subscribe({
+            next: (result) => {
+              console.info(result);
+              this.submittedPeriphericalDevice = true; 
             },
-            error: (e) =>
-            { 
+            error: (e) =>{ 
               console.error(e);
+              alert(e.error);
             }
           });
     }
@@ -88,9 +86,14 @@ export class AddPeriphericalDeviceToGatewayComponent implements OnInit {
       {
         return true;
       }
-    } 
-    alert(this.errorAddPeriphericalDevice);
+    }  
+
     return false;
+  }
+
+  getDate(format: string): string {
+    const dtDeviceCreated = new Date();
+    return this.datepipe.transform(dtDeviceCreated, format)!;
   }
 
   resetPeriphericalDeviceData(): void {
@@ -99,8 +102,8 @@ export class AddPeriphericalDeviceToGatewayComponent implements OnInit {
       id: 0,
       uId: 0,
       deviceVendor: '',
-      dtDeviceCreated: '',
-      online: false,
+      dtDeviceCreated: new Date(),
+      online: 'false',
       gatewayID: this.idGateway
     };
   }

@@ -15,6 +15,7 @@ import { AddGatewayComponent } from './components/add-gateway/add-gateway.compon
 import { DetailGatewayComponent } from './components/detail-gateway/detail-gateway.component';
 import { AddPeriphericalDeviceToGatewayComponent } from './components/add-peripherical-device-to-gateway/add-peripherical-device-to-gateway.component';
 import { GatewaysService } from './service/gateways.service';
+import { DatePipe } from '@angular/common'; 
 
 @NgModule({
   declarations: [
@@ -36,7 +37,7 @@ import { GatewaysService } from './service/gateways.service';
     RouterModule,
     AppRoutingModule 
   ],
-  providers: [GatewaysService],
+  providers: [GatewaysService, DatePipe],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

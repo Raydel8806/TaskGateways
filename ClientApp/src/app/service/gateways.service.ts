@@ -42,7 +42,7 @@ export class GatewaysService {
   }
   //OK
   AddPeriphericalDevice(id: any, data: any): Observable<any> {
-    return this.httpClient.post(this.baseUrl +"gateways/" + id, data, this.httpOptions);
+    return this.httpClient.post(this.baseUrl + "gateways/" + id, data, this.httpOptions);
   }
   //OK
   DeleteGateway(id: any): Observable<any> {

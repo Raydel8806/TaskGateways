@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Gateway } from '../../domain/gateway';
 import { Subscription } from 'rxjs';
 import { GatewaysService } from '../../service/gateways.service';
-import { Router } from '@angular/router'; 
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-master-gateways',
@@ -59,7 +59,7 @@ export class MasterGatewaysComponent implements OnInit, OnDestroy {
   //!!!future level Up
   public goEdit(idGateway: number): void
   {
-    const route = 'add-gateway/' + true.valueOf() + '/' + idGateway.toString();
+    const route = 'add-gateway/' + 1 + '/' + idGateway;
     console.log(route);
     this.router.navigate([route]);
   }

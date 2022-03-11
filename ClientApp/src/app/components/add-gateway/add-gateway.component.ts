@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Byte } from '@angular/compiler/src/util';
-import { ActivatedRoute } from '@angular/router'; 
+import { ActivatedRoute } from '@angular/router';
 import { Gateway } from '../../domain/gateway';
 import { PeriphericalDevice } from '../../domain/peripherical-device';
 import { GatewaysService } from '../../service/gateways.service';
+ 
   
 @Component({
   selector: 'app-add-gateway',
@@ -21,24 +22,24 @@ export class AddGatewayComponent implements OnInit {
     maxClientNumber: 10
   };
 
-  public page: string = "";
-  public pageAddMode: string = "Add new Gateway";
-  public pageEditMode: string = "Editing Gateway: ";  
+  public pageTitle: string = "";
+  public pageTitleAddMode: string = "Add new Gateway";
+  public pageTitleEditMode: string = "Editing Gateway: ";
   public idGateway: any='';
   public errorResult: any = '';
   public result: any = ''
   public submittedEdited: boolean = false;
-  public isEditedMode: any = false;
+  public isEditedMode: Byte = 0;
 
   //
   constructor(private gatewaysService: GatewaysService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.isEditedMode = this.route.snapshot.params['isEditedMode']; 
+    this.isEditedMode = this.route.snapshot.params['isEditedMode'];
     this.idGateway = this.route.snapshot.params['idGateway'];
-    this.page = this.pageAddMode;
+    this.pageTitle = this.pageTitleAddMode;
 
-    if (this.isEditedMode)
+    if (this.isEditedMode==1)
     { 
       this.gatewaysService
         .GetGateway(this
@@ -49,30 +50,19 @@ export class AddGatewayComponent implements OnInit {
             {
               this.gateway = result; 
               //guardo la respuesta para agregar nuevos dispositivos a este gateway
-              this.page = this.pageEditMode + this.idGateway;
+              this.pageTitle = this.pageTitleEditMode + this.gateway.name;
             },
             error: (e) =>
             {
               this.errorResult = e;
-              console.error(this.errorResult);
-            }
-/*** Upgrade late to show one for one case type!!!!
-        error: (e) => {         
-          if (e.status == 400){
-            if (e.ModelError[0]) {
-              this.error = e.ModelError[0];
-            }
-            else {
-              this.error = e.error.title;
-            }
-          }
-          ***/
+              console.error(this.errorResult.error);
+            } 
       });
     }
   }
 
   submitGateway(): void {
-    if (this.validData())
+    if (this.isValidData())
     {
       const newGateway = {
         id: this.gateway.id,
@@ -83,17 +73,25 @@ export class AddGatewayComponent implements OnInit {
         maxClientNumber: this.gateway.maxClientNumber
       };
 
-      if (this.isEditedMode == "true")
+      if (this.isEditedMode==1)
       {
         this.gatewaysService.UpdateGateway(newGateway)
           .subscribe({
             next: (result) => {
-              this.result = result;
               this.submittedEdited = true;
             },
             error: (e) => {
-              this.errorResult = e; console.error(this.errorResult);
-              alert(e.status);
+              this.errorResult = e; 
+
+              if (e.error.errors != null) {
+                if (e.error.errors.Name != null)
+                { 
+                  alert(e.error.errors.Name[0]); 
+                }
+                if (e.error.errors.SerialNumber!= null) {
+                  alert(e.error.errors.SerialNumber[0]);
+                }
+              }
             }
           }
         );
@@ -103,11 +101,14 @@ export class AddGatewayComponent implements OnInit {
           {
             next: (result) => {
               this.result = result;
-              this.submittedEdited = true;
+              this.submittedEdited = true; 
               this.gateway.id = (this.result as Gateway).id;
-
             },
-            error: (e) => { this.errorResult = e; console.error(this.errorResult); }
+            error: (e) => {
+              this.errorResult = e;
+              console.error(this.errorResult);
+              
+            }
           }
         ); 
       } 
@@ -119,8 +120,8 @@ export class AddGatewayComponent implements OnInit {
     
   resetGatewayData(): void {
     this.submittedEdited = false;
-    this.isEditedMode = false;
-    this.page = this.pageAddMode;
+    this.isEditedMode = 0;
+    this.pageTitle = this.pageTitleAddMode;
     this.gateway = {
       id: 0,
       serialNumber: "",
@@ -131,7 +132,7 @@ export class AddGatewayComponent implements OnInit {
     };
   }
 
-  validData(): boolean
+  isValidData(): boolean
   {
     if (this.gateway.serialNumber == '')
     {

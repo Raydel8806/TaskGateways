@@ -1,3 +1,5 @@
+import { DatePipe } from "@angular/common";
+
 /*
 export class PeriphericalDevice {
   /* 
@@ -24,7 +26,7 @@ export interface PeriphericalDevice {
   id: number;
   uId: number;
   deviceVendor: string;
-  dtDeviceCreated: string;
-  online: boolean;
+  dtDeviceCreated: Date;
+  online: string;
   gatewayID: number;
 }
